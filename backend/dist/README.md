@@ -1,0 +1,1 @@
+This folder contains the built output assets for the worker "trufas-da-malu-api" generated at 2026-05-02T14:14:27.684Z.

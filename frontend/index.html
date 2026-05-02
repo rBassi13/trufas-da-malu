@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Trufas da Malu</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffb6c1">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <h1>Trufas da Malu 💕</h1>
+            <p>Feitas com muito amor e carinho!</p>
+        </div>
+        <div class="cart-icon" onclick="toggleCart()">
+            🛒 <span id="cart-count">0</span>
+        </div>
+    </header>
+
+    <main>
+        <section class="promo-banner">
+            <h2>💕 Preços 💕</h2>
+            <div class="prices">
+                <div><span>1 POR</span><br><strong>R$ 4,00</strong></div>
+                <div><span>2 POR</span><br><strong>R$ 7,00</strong></div>
+                <div><span>3 POR</span><br><strong>R$ 10,00</strong></div>
+            </div>
+            <p class="payment-methods">ACEITAMOS PIX, DINHEIRO E CARTÃO</p>
+        </section>
+
+        <section class="products-grid" id="products-grid">
+            <!-- Produtos serão carregados via JS -->
+            <p class="loading">Carregando as delícias...</p>
+        </section>
+    </main>
+
+    <!-- Carrinho Sidebar -->
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h2>Seu Pedido 🛒</h2>
+            <button class="close-btn" onclick="toggleCart()">✖</button>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <!-- Itens do carrinho aqui -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cart-total-value">R$ 0,00</span>
+            </div>
+            <button class="checkout-btn" onclick="openCheckout()">Finalizar Pedido</button>
+        </div>
+    </div>
+
+    <!-- Modal de Checkout -->
+    <div class="modal" id="checkout-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeCheckout()">✖</button>
+            <h2>Finalizar Pedido</h2>
+            <form id="checkout-form" onsubmit="submitOrder(event)">
+                <div class="form-group">
+                    <label>Seu Nome (ou Apelido) 💕</label>
+                    <input type="text" id="cust-name" required placeholder="Ex: Maria">
+                </div>
+                <div class="form-group">
+                    <label>Seu WhatsApp (apenas números)</label>
+                    <input type="tel" id="cust-phone" required placeholder="Ex: 11999999999">
+                </div>
+                <div class="form-group">
+                    <label>Forma de Pagamento</label>
+                    <select id="payment-method" required>
+                        <option value="pix">Pix (Chave com a Malu)</option>
+                        <option value="dinheiro">Dinheiro</option>
+                        <option value="cartao">Cartão (Débito/Crédito)</option>
+                    </select>
+                </div>
+                <button type="submit" class="checkout-btn" id="submit-btn">Enviar Pedido para a Malu!</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast / Push Prompt -->
+    <div id="push-prompt" class="push-prompt hidden">
+        <p>Quer ser avisado quando o pedido estiver pronto? 🔔</p>
+        <button onclick="subscribeToPush()">Ativar Notificações</button>
+        <button class="text-btn" onclick="closePushPrompt()">Agora não</button>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

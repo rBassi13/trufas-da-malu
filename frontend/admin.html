@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin - Trufas da Malu</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+    <header class="admin-header">
+        <h1>Painel da Malu 👑</h1>
+        <button id="push-admin-btn" class="secondary-btn" onclick="subscribeAdminPush()">Ativar Notificações de Pedido 🔔</button>
+    </header>
+
+    <main class="admin-main">
+        <div id="login-section" class="login-section">
+            <h2>Acesso Restrito</h2>
+            <input type="password" id="admin-pass" placeholder="Senha secreta" />
+            <button onclick="login()">Entrar</button>
+            <p id="login-error" class="error"></p>
+        </div>
+
+        <div id="dashboard-section" class="dashboard-section hidden">
+            <button onclick="loadOrders()" class="refresh-btn">🔄 Atualizar Pedidos</button>
+
+            <div class="orders-container" id="orders-container">
+                <!-- Pedidos renderizados aqui -->
+            </div>
+        </div>
+    </main>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

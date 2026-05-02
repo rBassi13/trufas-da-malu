@@ -1,0 +1,20 @@
+name = "trufas-da-malu-api"
+main = "src/index.js"
+compatibility_date = "2024-03-01"
+
+# Cors é necessário para o desenvolvimento local.
+# Quando publicado, se API e Frontend ficarem no mesmo domínio, pode não ser necessário,
+# mas deixaremos configurado no código.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "trufas-malu-db"
+database_id = "SEU-DATABASE-ID" # Substitua pelo ID gerado ao criar o DB
+migrations_dir = "../database"
+
+[vars]
+# Variáveis e segredos de produção devem ser configurados via dashboard ou wrangler secret.
+# Para desenvolvimento local, crie um arquivo .dev.vars (já ignorado pelo git).
+# VAPID_SUBJECT = "mailto:seuemail@dominio.com"
+
+compatibility_flags = ["nodejs_compat"]
