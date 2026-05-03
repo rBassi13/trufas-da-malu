@@ -1,5 +1,7 @@
 // Configurações
-const API_URL = "[https://trufas-da-malu-api.alan-ricardo.workers.dev/api/]'; // Será relativo se hospedado junto, ou precisa alterar p/ URL do worker
+// const API_URL = "[https://trufas-da-malu-api.alan-ricardo.workers.dev/api/]'; // Será relativo se hospedado junto, ou precisa alterar p/ URL do worker
+const API_URL = "https://trufas-da-malu-api.alan-ricardo.workers.dev/api";
+
 
 let products = [];
 let cart = [];
