@@ -38,10 +38,10 @@ function renderProducts() {
         const img = p.image_url || '🍫';
 
         const card = document.createElement('div');
-        card.className = 'product-card';
+        card.className = `product-card ${p.is_gourmet ? 'gourmet' : ''}`;
         card.innerHTML = `
             ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `<div style="font-size:3rem; margin-bottom:10px">${img}</div>`}
-            <h3>${p.name}</h3>
+            <h3>${p.name} ${p.is_gourmet ? '🌟' : ''}</h3>
             <p>${p.description}</p>
             <button class="add-to-cart-btn" onclick="addToCart(${p.id})">Adicionar</button>
         `;

@@ -36,6 +36,18 @@ function showDashboard() {
     loadOrders();
 }
 
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+    document.getElementById(tabId).classList.remove('hidden');
+    document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+
+    if (tabId === 'orders-tab') loadOrders();
+    if (tabId === 'inventory-tab') loadInventory();
+    if (tabId === 'reports-tab') loadReports();
+}
+
 async function loadOrders() {
     try {
         const response = await fetch(`${API_URL}/orders`, {
@@ -117,6 +129,129 @@ async function updateOrderStatus(orderId, newValue, field) {
         }
     } catch(e) {
         alert('Erro ao atualizar pedido');
+    }
+}
+
+async function loadInventory() {
+    try {
+        const response = await fetch(`${API_URL}/products`);
+        const products = await response.json();
+        renderInventory(products);
+    } catch (e) {
+        console.error("Erro ao carregar estoque", e);
+    }
+}
+
+function renderInventory(products) {
+    const container = document.getElementById('inventory-container');
+    container.innerHTML = '';
+
+    products.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'inventory-item card';
+        div.innerHTML = `
+            <h4>${p.name} ${p.is_gourmet ? '🌟' : ''}</h4>
+            <div class="stock-controls">
+                <span>Estoque:</span>
+                <input type="number" id="stock-${p.id}" value="${p.stock}" />
+                <button onclick="updateStock(${p.id})">Salvar</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+async function updateStock(productId) {
+    const newStock = document.getElementById(`stock-${productId}`).value;
+    try {
+        const response = await fetch(`${API_URL}/products/${productId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${adminToken}`
+            },
+            body: JSON.stringify({ stock: parseInt(newStock) })
+        });
+        if (response.ok) {
+            alert('Estoque atualizado!');
+            loadInventory();
+        } else {
+            alert('Erro ao atualizar estoque!');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Erro ao atualizar estoque!');
+    }
+}
+
+function normalizeName(name) {
+    return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+}
+
+async function addProduct(e) {
+    e.preventDefault();
+    const name = document.getElementById('new-name').value;
+    const description = document.getElementById('new-desc').value;
+    const price = parseFloat(document.getElementById('new-price').value);
+    const stock = parseInt(document.getElementById('new-stock').value);
+    const isGourmet = document.getElementById('new-gourmet').checked;
+
+    let baseFilename = normalizeName(name);
+    let imageUrl = `/assets/trufa-${baseFilename}${isGourmet ? '-g' : ''}.png`;
+
+    try {
+        const response = await fetch(`${API_URL}/products`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${adminToken}`
+            },
+            body: JSON.stringify({
+                name,
+                description,
+                price,
+                stock,
+                image_url: imageUrl,
+                is_gourmet: isGourmet
+            })
+        });
+
+        if (response.ok) {
+            alert('Trufa cadastrada com sucesso!');
+            document.getElementById('add-product-form').reset();
+            loadInventory();
+        } else {
+            alert('Erro ao cadastrar trufa!');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Erro ao cadastrar trufa!');
+    }
+}
+
+async function loadReports() {
+    try {
+        const response = await fetch(`${API_URL}/orders`, {
+            headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+
+        if (!response.ok) return;
+
+        const orders = await response.json();
+
+        const pendingPayment = orders.filter(o => o.payment_status === 'PENDING');
+        const pendingDelivery = orders.filter(o => ['NEW', 'PREPARING', 'READY'].includes(o.status));
+
+        document.getElementById('report-pending-payment').innerHTML = pendingPayment.length > 0
+            ? pendingPayment.map(o => `<p>Pedido #${o.id} - ${o.customer_name} - R$ ${o.total_amount.toFixed(2)}</p>`).join('')
+            : '<p>Nenhum pagamento pendente.</p>';
+
+        document.getElementById('report-pending-delivery').innerHTML = pendingDelivery.length > 0
+            ? pendingDelivery.map(o => `<p>Pedido #${o.id} - ${o.customer_name} - Status: ${o.status}</p>`).join('')
+            : '<p>Nenhuma entrega pendente.</p>';
+
+    } catch (error) {
+        console.error("Erro ao carregar relatórios", error);
     }
 }
 

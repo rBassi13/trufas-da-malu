@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS products (
     description TEXT,
     price REAL NOT NULL,
     stock INTEGER NOT NULL DEFAULT 0,
-    image_url TEXT
+    image_url TEXT,
+    is_gourmet BOOLEAN NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS customers (
