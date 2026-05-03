@@ -5,7 +5,7 @@
 ### 1.1 Para o Project Owner (PO) / Negócio
 O sistema "Trufas da Malu" é uma plataforma de E-commerce otimizada (Progressive Web App - PWA) voltada para a venda direta de trufas. Focada na conversão e na usabilidade móvel (mobile-first), a plataforma permite que clientes realizem pedidos de forma rápida sem necessidade de login complexo (apenas nome e WhatsApp).
 Possui cálculo dinâmico de promoções (ex: 1 por R$4, 2 por R$7, 3 por R$10) e integrações de notificações push para avisar o cliente quando o pedido está "Pronto" e avisar o lojista (Malu) a cada novo pedido. O checkout informa as opções de pagamento presenciais ou via Pix.
-Para a administração, existe um painel protegido por senha onde a Malu pode gerenciar o status de produção e pagamento dos pedidos recebidos em tempo real.
+Para a administração, existe um painel protegido por senha onde a Malu pode gerenciar o status de produção e pagamento dos pedidos recebidos em tempo real, além de gerenciar o catálogo de trufas e ver relatórios.
 
 ### 1.2 Para o Desenvolvedor (Dev)
 A aplicação adota uma arquitetura Serverless e Edge Computing, baseada integralmente no ecossistema da Cloudflare (plano gratuito):
@@ -31,16 +31,17 @@ A aplicação adota uma arquitetura Serverless e Edge Computing, baseada integra
 │   └── seed.sql                   # Inserção de dados iniciais (produtos, configs)
 ├── frontend/                      # Aplicação PWA (Interface do Usuário)
 │   ├── index.html                 # Página principal da loja (catálogo e carrinho)
-│   ├── admin.html                 # Painel de controle de pedidos (protegido por senha)
+│   ├── admin.html                 # Painel de controle de pedidos e produtos (protegido por senha)
 │   ├── manifest.json              # Manifesto PWA para instalação
 │   ├── sw.js                      # Service Worker para caching offline e Push Notifications
 │   ├── css/
 │   │   └── style.css              # Estilos visuais de toda a aplicação (mobile-first)
 │   ├── js/
 │   │   ├── app.js                 # Lógica do catálogo, carrinho, checkout e push cliente
-│   │   └── admin.js               # Lógica de login, painel de pedidos e push admin
+│   │   └── admin.js               # Lógica de login, painel de pedidos, catálogo e push admin
 │   └── assets/                    # Ícones e imagens dos produtos (trufas)
 ├── README.md                      # Informações resumidas do repositório
+├── Documento.md                   # Documentação detalhada do sistema (este arquivo)
 ├── guia.md                        # Tutorial detalhado para deploy no Cloudflare
 ├── wrangler.jsonc                 # Configuração geral do wrangler para o projeto
 └── LICENSE                        # Licença de uso do software
@@ -59,6 +60,7 @@ A aplicação adota uma arquitetura Serverless e Edge Computing, baseada integra
     *   `price` (REAL NOT NULL)
     *   `stock` (INTEGER NOT NULL DEFAULT 0)
     *   `image_url` (TEXT)
+    *   `is_gourmet` (BOOLEAN NOT NULL DEFAULT 0) - Flag que indica se a trufa é gourmet.
 *   **`customers` (Clientes):** Cadastro simples de clientes baseados em telefone.
     *   `id` (INTEGER PRIMARY KEY)
     *   `phone` (TEXT NOT NULL UNIQUE)
@@ -93,7 +95,13 @@ A API atende as chamadas HTTP do Frontend. Segue o padrão de roteamento nativo 
 
 ### Principais Rotas e Funções
 *   **`GET /api/products`**
-    *   Retorna todos os produtos do banco de dados (catálogo).
+    *   Retorna todos os produtos do banco de dados (catálogo) ordenados alfabeticamente.
+*   **`POST /api/products` (Requer Autenticação)**
+    *   *Ações:* Cria um novo produto no banco.
+    *   *Inputs:* `name`, `description`, `price`, `stock`, `image_url`, `is_gourmet` (boolean).
+    *   *Detalhe:* Retorna o ID gerado acessando `info.meta.last_row_id`.
+*   **`PATCH /api/products/:id` (Requer Autenticação)**
+    *   *Ações:* Atualiza os dados de um produto existente (stock, price, description).
 *   **`POST /api/orders`**
     *   *Função Envolvida:* `handleCreateOrder(request, env, headers)`
     *   *Ações:*
@@ -102,31 +110,32 @@ A API atende as chamadas HTTP do Frontend. Segue o padrão de roteamento nativo 
         3. Cria o pedido (`orders`) e insere os itens correspondentes (`order_items`), descontando do estoque (usando transação batch).
         4. Dispara a notificação de Web Push para a Administradora informando do novo pedido, através da função `notifyAdmin()`.
 *   **`GET /api/orders` (Requer Autenticação)**
-    *   *Ações:* Checa autenticação (via header `Authorization: Bearer <SENHA>`). Retorna todos os pedidos mais recentes formatados com nome e telefone do cliente.
+    *   *Ações:* Checa autenticação (via header `Authorization: Bearer <SENHA>`). Retorna todos os pedidos mais recentes formatados com nome e telefone do cliente, unindo as tabelas `orders` e `customers`.
 *   **`PATCH /api/orders/:id` (Requer Autenticação)**
-    *   *Ações:* Atualiza os campos `status` ou `payment_status` de um pedido específico. Se o `status` for atualizado para `READY` (Pronto), aciona a função `notifyCustomer(orderId, env)` para enviar uma notificação web push ao cliente.
+    *   *Ações:* Atualiza os campos `status` ou `payment_status` de um pedido específico. Se o `status` for atualizado para `READY` (Pronto), aciona a função `notifyCustomer(orderId, env)` para enviar uma notificação web push ao cliente usando `ctx.waitUntil`.
 *   **`POST /api/push/subscribe`**
-    *   *Ações:* Recebe e armazena chaves (endpoint, auth, p256dh) fornecidas pelo frontend em `push_subscriptions`. Diferencia os inscritos via `userType` ('admin' ou 'customer').
+    *   *Ações:* Recebe e armazena chaves (endpoint, auth, p256dh) fornecidas pelo frontend em `push_subscriptions`. Diferencia os inscritos via `userType` ('admin' ou 'customer'). Associa ao cliente se `customerPhone` for fornecido.
 *   **`POST /api/admin/login`**
     *   *Ações:* Valida a senha fornecida com a variável de ambiente `ADMIN_PASSWORD`.
 
 ### Subsistema de Push Notifications
 *   `notifyAdmin(customerName, totalAmount, env)`: Busca assinaturas do admin e monta payload "Novo pedido recebido".
 *   `notifyCustomer(orderId, env)`: Busca assinaturas vinculadas ao `customer_id` do pedido e monta payload "Seu pedido está pronto!".
-*   `sendPushNotifications(subscriptions, payload, env)`: Utiliza `@pushforge/builder` com VAPID keys injetadas via variáveis de ambiente (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`) para forjar requisições Web Push diretamente da Edge, sem precisar da biblioteca pesada padrão do node `web-push`.
+*   `sendPushNotifications(subscriptions, payload, env)`: Utiliza `@pushforge/builder` com VAPID keys injetadas via variáveis de ambiente (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`) para forjar requisições Web Push diretamente da Edge, sem precisar da biblioteca pesada padrão do node `web-push`. Trata erros de status 410 ou 404 para deletar assinaturas inválidas.
 
 ---
 
 ## 5. Frontend (`frontend/js/`)
 
 ### Lógica da Loja (`app.js`)
-*   **Carregamento e Exibição:** `loadProducts()`, `renderProducts()` - Buscam os produtos da `/api/products` e os montam no HTML dinamicamente.
+*   **Carregamento e Exibição:** `loadProducts()`, `renderProducts()` - Buscam os produtos da `/api/products` e os montam no HTML dinamicamente. Os produtos gourmet têm destaque visual (estrela e classe `.gourmet`).
 *   **Carrinho e Cálculo de Promoção:** `addToCart()`, `removeFromCart()`, `calculateTotal()`. A função `calculateTotal()` contém as regras de negócio de descontos locais (calcula blocos de 3 trufas e aplica desconto conforme sobra).
 *   **Finalização de Pedido:** `submitOrder()` - Captura dados do modal de Checkout, faz postagem de payload JSON para `/api/orders`. Salva dados do cliente no `localStorage` (`malu_user_phone`, `malu_user_name`).
 *   **Push Notification Cliente:** Após a compra, exibe prompt (`subscribeToPush()`). Ao autorizar, inscreve o ServiceWorker com uma VAPID pública e envia as chaves de assinatura para `/api/push/subscribe` definindo `userType` como `customer` junto com o telefone.
 
 ### Painel Administrativo (`admin.js`)
 *   **Autenticação Simples:** `login()` checa contra `/api/admin/login` e, em caso de sucesso, armazena a senha bruta no `localStorage` sob a chave `malu_admin_token`, que é injetada em um `Bearer token` nas chamadas.
-*   **Gerenciamento de Pedidos:** `loadOrders()` e `renderOrders()` - Populam a interface exibindo selects iterativos para alterar estado.
+*   **Gerenciamento de Pedidos:** `loadOrders()` e `renderOrders()` - Populam a interface exibindo selects iterativos para alterar estado (`status` e `payment_status`).
 *   **Atualização de Status:** `updateOrderStatus(orderId, newValue, field)` - Realiza `PATCH` para a API. Alterar para 'Pronto' ativará notificações do lado do backend para o cliente.
+*   **Gerenciamento de Produtos:** `loadInventory()` e `renderInventory()` listam os produtos permitindo alterar estoque, preço e descrição (`updateProduct(productId)`). Há também uma função `addProduct(e)` que chama a rota `POST /api/products` formatando automaticamente a URL da imagem baseada no nome da trufa (`trufa-[nome]-g.png` para gourmet).
 *   **Push Notification Admin:** `subscribeAdminPush()` - Inscreve a administradora (Malu) no sistema de notificação, enviando as chaves para `/api/push/subscribe` com `userType` de `admin`.
