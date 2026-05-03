@@ -151,18 +151,31 @@ function renderInventory(products) {
         div.className = 'inventory-item card';
         div.innerHTML = `
             <h4>${p.name} ${p.is_gourmet ? '🌟' : ''}</h4>
-            <div class="stock-controls">
-                <span>Estoque:</span>
-                <input type="number" id="stock-${p.id}" value="${p.stock}" />
-                <button onclick="updateStock(${p.id})">Salvar</button>
+            <div class="stock-controls" style="display: flex; flex-direction: column; gap: 8px;">
+                <label>
+                    Descrição:
+                    <input type="text" id="desc-${p.id}" value="${p.description}" />
+                </label>
+                <label>
+                    Preço (R$):
+                    <input type="number" step="0.01" id="price-${p.id}" value="${p.price}" />
+                </label>
+                <label>
+                    Estoque:
+                    <input type="number" id="stock-${p.id}" value="${p.stock}" />
+                </label>
+                <button onclick="updateProduct(${p.id})">Salvar Alterações</button>
             </div>
         `;
         container.appendChild(div);
     });
 }
 
-async function updateStock(productId) {
+async function updateProduct(productId) {
     const newStock = document.getElementById(`stock-${productId}`).value;
+    const newPrice = document.getElementById(`price-${productId}`).value;
+    const newDesc = document.getElementById(`desc-${productId}`).value;
+
     try {
         const response = await fetch(`${API_URL}/products/${productId}`, {
             method: 'PATCH',
@@ -170,17 +183,21 @@ async function updateStock(productId) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${adminToken}`
             },
-            body: JSON.stringify({ stock: parseInt(newStock) })
+            body: JSON.stringify({
+                stock: parseInt(newStock),
+                price: parseFloat(newPrice),
+                description: newDesc
+            })
         });
         if (response.ok) {
-            alert('Estoque atualizado!');
+            alert('Produto atualizado!');
             loadInventory();
         } else {
-            alert('Erro ao atualizar estoque!');
+            alert('Erro ao atualizar produto!');
         }
     } catch (e) {
         console.error(e);
-        alert('Erro ao atualizar estoque!');
+        alert('Erro ao atualizar produto!');
     }
 }
 

@@ -38,7 +38,7 @@ export default {
         )
           .bind(data.name, data.description, data.price, data.stock, data.image_url, data.is_gourmet ? 1 : 0)
           .run();
-        return new Response(JSON.stringify({ success: true, id: info.lastRowId }), { headers });
+        return new Response(JSON.stringify({ success: true, id: info.meta.last_row_id }), { headers });
       }
 
       if (url.pathname.startsWith("/api/products/") && method === "PATCH") {
@@ -47,9 +47,26 @@ export default {
         const productId = url.pathname.split("/").pop();
         const data = await request.json();
 
+        const updates = [];
+        const params = [];
+
         if (data.stock !== undefined) {
-          await env.DB.prepare("UPDATE products SET stock = ? WHERE id = ?")
-            .bind(data.stock, productId)
+          updates.push("stock = ?");
+          params.push(data.stock);
+        }
+        if (data.price !== undefined) {
+          updates.push("price = ?");
+          params.push(data.price);
+        }
+        if (data.description !== undefined) {
+          updates.push("description = ?");
+          params.push(data.description);
+        }
+
+        if (updates.length > 0) {
+          params.push(productId);
+          await env.DB.prepare(`UPDATE products SET ${updates.join(", ")} WHERE id = ?`)
+            .bind(...params)
             .run();
         }
         return new Response(JSON.stringify({ success: true }), { headers });
