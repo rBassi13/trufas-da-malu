@@ -9,7 +9,7 @@ compatibility_date = "2024-03-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "trufas-malu-db"
-database_id = "SEU-DATABASE-ID" # Substitua pelo ID gerado ao criar o DB
+database_id = "1bdb3def-78c2-406c-944a-4701df2dc6e8" # Substitua pelo ID gerado ao criar o DB
 migrations_dir = "../database"
 
 [vars]
