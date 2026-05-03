@@ -23,10 +23,53 @@
         </div>
 
         <div id="dashboard-section" class="dashboard-section hidden">
-            <button onclick="loadOrders()" class="refresh-btn">🔄 Atualizar Pedidos</button>
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="switchTab('orders-tab')">Pedidos</button>
+                <button class="tab-btn" onclick="switchTab('inventory-tab')">Estoque</button>
+                <button class="tab-btn" onclick="switchTab('reports-tab')">Relatórios</button>
+            </div>
 
-            <div class="orders-container" id="orders-container">
-                <!-- Pedidos renderizados aqui -->
+            <div id="orders-tab" class="tab-content active">
+                <button onclick="loadOrders()" class="refresh-btn">🔄 Atualizar Pedidos</button>
+                <div class="orders-container" id="orders-container">
+                    <!-- Pedidos renderizados aqui -->
+                </div>
+            </div>
+
+            <div id="inventory-tab" class="tab-content hidden">
+                <div class="add-product-section card">
+                    <h3>Adicionar Nova Trufa</h3>
+                    <form id="add-product-form" onsubmit="addProduct(event)">
+                        <input type="text" id="new-name" placeholder="Nome (Ex: Pistache)" required>
+                        <input type="text" id="new-desc" placeholder="Descrição" required>
+                        <input type="number" id="new-price" placeholder="Preço" value="4.00" step="0.01" required>
+                        <input type="number" id="new-stock" placeholder="Estoque Inicial" value="50" required>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="new-gourmet">
+                            <label for="new-gourmet">Trufa Gourmet (Borda dourada)</label>
+                        </div>
+                        <button type="submit">Cadastrar Trufa</button>
+                    </form>
+                </div>
+                <button onclick="loadInventory()" class="refresh-btn">🔄 Atualizar Estoque</button>
+                <div class="inventory-container" id="inventory-container">
+                    <!-- Estoque renderizado aqui -->
+                </div>
+            </div>
+
+            <div id="reports-tab" class="tab-content hidden">
+                <div class="reports-section card">
+                    <h3>Relatórios</h3>
+                    <div class="report-box">
+                        <h4>Pendentes de Pagamento</h4>
+                        <div id="report-pending-payment">Carregando...</div>
+                    </div>
+                    <div class="report-box">
+                        <h4>Pendentes de Entrega</h4>
+                        <div id="report-pending-delivery">Carregando...</div>
+                    </div>
+                    <button onclick="loadReports()" class="refresh-btn">🔄 Atualizar Relatórios</button>
+                </div>
             </div>
         </div>
     </main>

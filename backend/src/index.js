@@ -24,9 +24,35 @@ export default {
     try {
       if (url.pathname === "/api/products" && method === "GET") {
         const { results } = await env.DB.prepare(
-          "SELECT * FROM products",
+          "SELECT * FROM products ORDER BY name ASC",
         ).all();
         return new Response(JSON.stringify(results), { headers });
+      }
+
+      if (url.pathname === "/api/products" && method === "POST") {
+        if (!checkAuth(request, env))
+          return new Response("Unauthorized", { status: 401, headers });
+        const data = await request.json();
+        const info = await env.DB.prepare(
+          "INSERT INTO products (name, description, price, stock, image_url, is_gourmet) VALUES (?, ?, ?, ?, ?, ?)"
+        )
+          .bind(data.name, data.description, data.price, data.stock, data.image_url, data.is_gourmet ? 1 : 0)
+          .run();
+        return new Response(JSON.stringify({ success: true, id: info.lastRowId }), { headers });
+      }
+
+      if (url.pathname.startsWith("/api/products/") && method === "PATCH") {
+        if (!checkAuth(request, env))
+          return new Response("Unauthorized", { status: 401, headers });
+        const productId = url.pathname.split("/").pop();
+        const data = await request.json();
+
+        if (data.stock !== undefined) {
+          await env.DB.prepare("UPDATE products SET stock = ? WHERE id = ?")
+            .bind(data.stock, productId)
+            .run();
+        }
+        return new Response(JSON.stringify({ success: true }), { headers });
       }
 
       if (url.pathname === "/api/orders" && method === "POST") {
