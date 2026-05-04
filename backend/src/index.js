@@ -5,19 +5,27 @@ export default {
     const url = new URL(request.url);
     const method = request.method;
 
-    // CORS Handling
+    // 1. Centralizando os Headers de CORS para não repetir código
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    };
+
+    // 2. Ajustando o Preflight (OPTIONS) com status correto e cache (Max-Age)
     if (method === "OPTIONS") {
       return new Response(null, {
+        status: 204,
         headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          ...corsHeaders,
+          "Access-Control-Max-Age": "86400",
         },
       });
     }
 
+    // 3. Injetando os headers do CORS nas respostas padrão da API
     const headers = {
-      "Access-Control-Allow-Origin": "*",
+      ...corsHeaders,
       "Content-Type": "application/json",
     };
 
