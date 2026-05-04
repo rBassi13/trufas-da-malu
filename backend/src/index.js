@@ -159,7 +159,7 @@ export default {
       }
 
       // Validação de admin via endpoint simples
-      if (url.pathname === "/api/admin/login" && method === "POST") {
+      if (normalizedPath === "/api/admin/login" && method === "POST") {
         const { password } = await request.json();
         if (password === env.ADMIN_PASSWORD) {
           return new Response(JSON.stringify({ success: true }), { headers });
