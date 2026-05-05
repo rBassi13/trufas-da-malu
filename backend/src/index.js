@@ -5,6 +5,9 @@ export default {
     const url = new URL(request.url);
     const method = request.method;
 
+    // 🛠️ Pílula da Liia: Limpando a URL para evitar o bug da barra dupla/trailing slash
+    const cleanPath = url.pathname.replace(/\/+$/, "") || "/";
+
     // 1. Centralizando os Headers de CORS para não repetir código
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
@@ -30,14 +33,14 @@ export default {
     };
 
     try {
-      if (url.pathname === "/api/products" && method === "GET") {
+      if (cleanPath === "/api/products" && method === "GET") {
         const { results } = await env.DB.prepare(
           "SELECT * FROM products ORDER BY name ASC",
         ).all();
         return new Response(JSON.stringify(results), { headers });
       }
 
-      if (url.pathname === "/api/products" && method === "POST") {
+      if (cleanPath === "/api/products" && method === "POST") {
         if (!checkAuth(request, env))
           return new Response("Unauthorized", { status: 401, headers });
         const data = await request.json();
@@ -49,10 +52,10 @@ export default {
         return new Response(JSON.stringify({ success: true, id: info.meta.last_row_id }), { headers });
       }
 
-      if (url.pathname.startsWith("/api/products/") && method === "PATCH") {
+      if (cleanPath.startsWith("/api/products/") && method === "PATCH") {
         if (!checkAuth(request, env))
           return new Response("Unauthorized", { status: 401, headers });
-        const productId = url.pathname.split("/").pop();
+        const productId = cleanPath.split("/").pop();
         const data = await request.json();
 
         const updates = [];
@@ -80,11 +83,11 @@ export default {
         return new Response(JSON.stringify({ success: true }), { headers });
       }
 
-      if (url.pathname === "/api/orders" && method === "POST") {
+      if (cleanPath === "/api/orders" && method === "POST") {
         return await handleCreateOrder(request, env, headers);
       }
 
-      if (url.pathname === "/api/orders" && method === "GET") {
+      if (cleanPath === "/api/orders" && method === "GET") {
         // Protected route
         if (!checkAuth(request, env))
           return new Response("Unauthorized", { status: 401, headers });
@@ -99,10 +102,10 @@ export default {
         return new Response(JSON.stringify(results), { headers });
       }
 
-      if (url.pathname.startsWith("/api/orders/") && method === "PATCH") {
+      if (cleanPath.startsWith("/api/orders/") && method === "PATCH") {
         if (!checkAuth(request, env))
           return new Response("Unauthorized", { status: 401, headers });
-        const orderId = url.pathname.split("/").pop();
+        const orderId = cleanPath.split("/").pop();
         const data = await request.json();
 
         const updates = [];
@@ -132,7 +135,7 @@ export default {
         return new Response(JSON.stringify({ success: true }), { headers });
       }
 
-      if (url.pathname === "/api/push/subscribe" && method === "POST") {
+      if (cleanPath === "/api/push/subscribe" && method === "POST") {
         const data = await request.json();
         const { endpoint, keys, userType, customerPhone } = data;
         let customerId = null;
@@ -158,8 +161,8 @@ export default {
         return new Response(JSON.stringify({ success: true }), { headers });
       }
 
-      // Validação de admin via endpoint simples
-      if (normalizedPath === "/api/admin/login" && method === "POST") {
+      // 🛠️ Pílula da Liia: O Boss final do seu erro tava aqui. normalizedPath arrumado!
+      if (cleanPath === "/api/admin/login" && method === "POST") {
         const { password } = await request.json();
         if (password === env.ADMIN_PASSWORD) {
           return new Response(JSON.stringify({ success: true }), { headers });
