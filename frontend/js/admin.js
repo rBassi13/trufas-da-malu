@@ -30,6 +30,18 @@ async function login() {
     }
 }
 
+// 🚪 Função NOVA: Logout do Painel
+function logout() {
+    // Remove o token do armazenamento do navegador
+    localStorage.removeItem('malu_admin_token');
+    
+    // Limpa a variável em memória
+    adminToken = null;
+    
+    // Dá um F5 forçado na página pra voltar pra tela de login
+    location.reload();
+}
+
 function showDashboard() {
     document.getElementById('login-section').classList.add('hidden');
     document.getElementById('dashboard-section').classList.remove('hidden');
