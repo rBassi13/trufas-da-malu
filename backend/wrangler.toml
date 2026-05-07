@@ -1,20 +1,20 @@
+#:schema node_modules/wrangler/config-schema.json
 name = "trufas-da-malu-api"
 main = "src/index.js"
-compatibility_date = "2024-03-01"
+compatibility_date = "2026-05-05"
 
-# Cors é necessário para o desenvolvimento local.
-# Quando publicado, se API e Frontend ficarem no mesmo domínio, pode não ser necessário,
-# mas deixaremos configurado no código.
+# 🛠️ Define que não estamos enviando assets estáticos por esse Worker 
+# (o PWA do frontend deve ser hospedado via Cloudflare Pages separadamente)
+workers_dev = true
 
+# 📦 Variáveis de Ambiente não-secretas
+[vars]
+# VAPID_SUBJECT = "mailto:admin@trufasdamalu.com.br"
+# Obs: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY e ADMIN_PASSWORD são sensíveis
+# e NÃO devem ficar expostas aqui em texto limpo!
+
+# 🗄️ Integração com o Banco de Dados D1 (SQLite)
 [[d1_databases]]
 binding = "DB"
-database_name = "trufas-malu-db"
-database_id = "1bdb3def-78c2-406c-944a-4701df2dc6e8" # Substitua pelo ID gerado ao criar o DB
-migrations_dir = "../database"
-
-[vars]
-# Variáveis e segredos de produção devem ser configurados via dashboard ou wrangler secret.
-# Para desenvolvimento local, crie um arquivo .dev.vars (já ignorado pelo git).
-# VAPID_SUBJECT = "mailto:seuemail@dominio.com"
-
-compatibility_flags = ["nodejs_compat"]
+database_name = "trufas_da_malu_db" # Nome do seu banco de dados
+database_id = "1bdb3def-78c2-406c-944a-4701df2dc6e8" # Substitua pelo ID real do seu D1 lá do painel da Cloudflare

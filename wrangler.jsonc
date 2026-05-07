@@ -12,3 +12,16 @@
     "nodejs_compat"
   ]
 }
+
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "trufas-da-malu",
+  "compatibility_date": "2026-05-03",
+  "main": "worker-proxy.js",
+  "assets": {
+    "directory": "frontend",
+    "binding": "ASSETS"
+  },
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true }
+}
