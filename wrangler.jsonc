@@ -12,7 +12,7 @@
     "nodejs_compat"
   ]
 }
-
+/*
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "trufas-da-malu",
@@ -25,3 +25,4 @@
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true }
 }
+  */
