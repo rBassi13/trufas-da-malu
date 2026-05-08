@@ -439,17 +439,17 @@ header p {
 .push-prompt .text-btn { background: none; color: #666; text-decoration: underline; padding: 5px;}
 
 /* =========================================================
-   👑 GLOW UP DO PAINEL ADMIN (LIIA'S BUILD)
+   👑 LIIA'S BUILD: GLOW UP DO PAINEL ADMIN E BOTÕES
    ========================================================= */
 
-/* 1. Limite de Largura do Painel para não esticar no PC */
+/* Limite de Largura e redução de espaços (Mobile) */
 .admin-main {
     max-width: 900px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 10px !important; 
 }
 
-/* 2. Grid Responsivo para a aba de Estoque */
+/* Grid Responsivo Estoque */
 .inventory-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -457,7 +457,7 @@ header p {
     margin-top: 20px;
 }
 
-/* 3. Estilização de Inputs, Selects e botões de filtro */
+/* Inputs, Selects do Admin */
 .admin-main input[type="text"],
 .admin-main input[type="number"],
 .admin-main input[type="password"],
@@ -465,7 +465,7 @@ header p {
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 10px 12px;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-main);
     font-size: 0.95em;
     color: #333;
     transition: all 0.3s ease;
@@ -475,12 +475,12 @@ header p {
 .admin-main input:focus,
 .admin-main select:focus {
     outline: none;
-    border-color: #ff6b81; /* Rosa da loja */
-    box-shadow: 0 0 0 3px rgba(255, 107, 129, 0.2);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 107, 139, 0.2);
     background-color: #fff;
 }
 
-/* 4. Sistema de Badges (Pílulas de Status para Pedidos) */
+/* Badges de Status (Pedidos) */
 .badge {
     padding: 4px 10px;
     border-radius: 20px;
@@ -490,18 +490,14 @@ header p {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+.badge-new { background-color: #e0f2fe; color: #0284c7; } 
+.badge-preparing { background-color: #fef08a; color: #a16207; } 
+.badge-ready { background-color: #dcfce7; color: #166534; } 
+.badge-delivered { background-color: #f3f4f6; color: #4b5563; } 
+.badge-pending { background-color: #ffedd5; color: #c2410c; } 
+.badge-paid { background-color: #d1fae5; color: #065f46; } 
 
-/* Cores das Badges de Status do Pedido */
-.badge-new { background-color: #e0f2fe; color: #0284c7; } /* Azul */
-.badge-preparing { background-color: #fef08a; color: #a16207; } /* Amarelo */
-.badge-ready { background-color: #dcfce7; color: #166534; } /* Verde */
-.badge-delivered { background-color: #f3f4f6; color: #4b5563; } /* Cinza */
-
-/* Cores das Badges de Pagamento */
-.badge-pending { background-color: #ffedd5; color: #c2410c; } /* Laranja */
-.badge-paid { background-color: #d1fae5; color: #065f46; } /* Verde Esmeralda */
-
-/* 5. Refinamento dos Cards de Pedidos */
+/* Cards de Pedidos */
 .order-card {
     background: #fff;
     border-radius: 12px;
@@ -509,7 +505,7 @@ header p {
     margin-bottom: 20px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     border: 1px solid #f0f0f0;
-    border-left: 6px solid #ff6b81; /* Destaque lateral */
+    border-left: 6px solid var(--primary-color); 
 }
 
 .order-actions {
@@ -524,18 +520,15 @@ header p {
     flex: 1;
     cursor: pointer;
 }
-/* =========================================================
-   👑 GLOW UP PT. 2: NAVEGAÇÃO E BOTÕES (LIIA'S BUILD)
-   ========================================================= */
 
-/* 1. Navegação de Abas (Estilo "Segmented Control" tipo iOS) */
+/* Abas estilo iOS (Segmented Control) */
 .admin-tabs {
     display: flex;
     justify-content: center;
-    background-color: #f1f5f9; /* Cinza bem clarinho de fundo */
+    background-color: #f1f5f9;
     padding: 6px;
     border-radius: 14px;
-    margin-bottom: 25px;
+    margin-bottom: 10px !important; /* Espaço reduzido */
     gap: 5px;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
 }
@@ -547,7 +540,7 @@ header p {
     border: none;
     padding: 10px 15px;
     border-radius: 10px;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-main);
     font-weight: 600;
     font-size: 0.95em;
     color: #64748b;
@@ -555,67 +548,23 @@ header p {
     transition: all 0.3s ease;
 }
 
-/* O destaque da aba que está selecionada no momento */
 .tab-btn.active {
     background-color: #fff;
-    color: #ff6b81; /* Rosa principal da loja */
+    color: var(--primary-color);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-/* 2. Botões de Ação da Barra de Ferramentas (Adicionar, Atualizar) */
-button.secondary-btn, 
-button.refresh-btn {
-    background-color: #fff;
-    border: 1px solid #e2e8f0;
-    color: #475569;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Efeito ao passar o mouse */
-button.secondary-btn:hover, 
-button.refresh-btn:hover {
-    border-color: #ff6b81;
-    color: #ff6b81;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(255, 107, 129, 0.15);
-}
-
-/* 3. O botão de Sair com visual moderno de "Ação Destrutiva" */
-button[onclick="logout()"] {
-    background-color: #fef2f2 !important;
-    color: #ef4444 !important;
-    border: 1px solid #fee2e2 !important;
-    box-shadow: none !important;
-    transition: all 0.2s ease;
-}
-
-button[onclick="logout()"]:hover {
-    background-color: #fee2e2 !important;
-    transform: translateY(-2px);
-}
-
-/* =========================================================
-   👑 GLOW UP PT. 3: BOTÕES ÓRFÃOS E GLASSMORPHISM (LIIA'S BUILD)
-   ========================================================= */
-
-/* 1. Botão de Notificações (Efeito Vidro no Header) */
+/* Botão Notificações (Sininho Glassmorphism) */
 #push-admin-btn {
-    background-color: rgba(255, 255, 255, 0.2) !important; /* Fundo semi-transparente */
+    background-color: rgba(255, 255, 255, 0.2) !important;
     color: #fff !important;
     border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    border-radius: 20px !important; /* Formato pílula */
+    border-radius: 20px !important;
     padding: 8px 16px !important;
-    font-family: 'Poppins', sans-serif !important;
+    font-family: var(--font-main) !important;
     font-size: 0.85em !important;
     font-weight: 600 !important;
-    backdrop-filter: blur(4px); /* Borrão de vidro estilo iOS */
+    backdrop-filter: blur(4px);
     box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
     margin-top: 10px;
     cursor: pointer;
@@ -627,35 +576,35 @@ button[onclick="logout()"]:hover {
     transform: translateY(-2px);
 }
 
-/* 2. Botões de Atualizar (Pedidos, Relatórios e Estoque) */
+/* Botões Atualizar */
 .refresh-btn {
     background-color: #fff !important;
-    color: #ff6b81 !important; /* Letra rosa pra combinar com a loja */
-    border: 1px solid #ffe4e6 !important; /* Borda rosa clarinha */
-    border-radius: 20px !important; /* Formato pílula */
+    color: var(--primary-color) !important;
+    border: 1px solid #ffe4e6 !important;
+    border-radius: 20px !important;
     padding: 8px 18px !important;
-    font-family: 'Poppins', sans-serif !important;
+    font-family: var(--font-main) !important;
     font-size: 0.85em !important;
     font-weight: 600 !important;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(255, 107, 129, 0.05) !important;
-    margin-bottom: 15px !important; /* Espaço para respirar */
+    box-shadow: 0 2px 4px rgba(255, 107, 139, 0.05) !important;
+    margin-bottom: 10px !important; /* Espaço reduzido */
     transition: all 0.2s ease;
 }
 
 .refresh-btn:hover {
     background-color: #fff0f2 !important;
-    border-color: #ff6b81 !important;
+    border-color: var(--primary-color) !important;
 }
 
-/* 3. Botão de Sair do Painel (Polimento de Ação Destrutiva) */
+/* Botão Sair do Painel */
 button[onclick="logout()"] {
     background-color: #fff !important;
-    color: #ef4444 !important; /* Vermelho alerta */
-    border: 1px solid #fecaca !important; /* Borda vermelha clarinha */
-    border-radius: 20px !important; /* Formato pílula */
+    color: #ef4444 !important;
+    border: 1px solid #fecaca !important;
+    border-radius: 20px !important;
     padding: 6px 14px !important;
-    font-family: 'Poppins', sans-serif !important;
+    font-family: var(--font-main) !important;
     font-size: 0.85em !important;
     font-weight: 600 !important;
     box-shadow: 0 2px 4px rgba(239, 68, 68, 0.05) !important;
@@ -667,4 +616,38 @@ button[onclick="logout()"] {
 button[onclick="logout()"]:hover {
     background-color: #fef2f2 !important;
     border-color: #ef4444 !important;
+}
+
+/* Botão Adicionar Nova Trufa (Pílula Moderna) e Secundários */
+#toggle-add-btn, .secondary-btn {
+    background-color: #fff !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 20px !important; /* Formato pílula */
+    padding: 8px 16px !important;
+    font-family: var(--font-main) !important;
+    font-size: 0.85em !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+    margin: 0 !important;
+    cursor: pointer;
+    transition: all 0.2s ease !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#toggle-add-btn:hover, .secondary-btn:hover {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    transform: translateY(-2px);
+}
+
+/* Correções finais de espaço em branco */
+#dashboard-section > div:first-child {
+    margin-bottom: 5px !important;
+}
+#inventory-tab > div:nth-of-type(1) {
+    margin-bottom: 12px !important;
+    gap: 8px !important;
 }
