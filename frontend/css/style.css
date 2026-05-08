@@ -437,3 +437,91 @@ header p {
 .push-prompt p { margin-bottom: 10px; font-weight: bold; }
 .push-prompt button { background: var(--primary-color); color:white; padding: 10px 20px; border:none; border-radius: 20px; width: 100%; margin-bottom: 5px;}
 .push-prompt .text-btn { background: none; color: #666; text-decoration: underline; padding: 5px;}
+
+/* =========================================================
+   👑 GLOW UP DO PAINEL ADMIN (LIIA'S BUILD)
+   ========================================================= */
+
+/* 1. Limite de Largura do Painel para não esticar no PC */
+.admin-main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 2. Grid Responsivo para a aba de Estoque */
+.inventory-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* 3. Estilização de Inputs, Selects e botões de filtro */
+.admin-main input[type="text"],
+.admin-main input[type="number"],
+.admin-main input[type="password"],
+.admin-main select {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95em;
+    color: #333;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+}
+
+.admin-main input:focus,
+.admin-main select:focus {
+    outline: none;
+    border-color: #ff6b81; /* Rosa da loja */
+    box-shadow: 0 0 0 3px rgba(255, 107, 129, 0.2);
+    background-color: #fff;
+}
+
+/* 4. Sistema de Badges (Pílulas de Status para Pedidos) */
+.badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 800;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Cores das Badges de Status do Pedido */
+.badge-new { background-color: #e0f2fe; color: #0284c7; } /* Azul */
+.badge-preparing { background-color: #fef08a; color: #a16207; } /* Amarelo */
+.badge-ready { background-color: #dcfce7; color: #166534; } /* Verde */
+.badge-delivered { background-color: #f3f4f6; color: #4b5563; } /* Cinza */
+
+/* Cores das Badges de Pagamento */
+.badge-pending { background-color: #ffedd5; color: #c2410c; } /* Laranja */
+.badge-paid { background-color: #d1fae5; color: #065f46; } /* Verde Esmeralda */
+
+/* 5. Refinamento dos Cards de Pedidos */
+.order-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
+    border-left: 6px solid #ff6b81; /* Destaque lateral */
+}
+
+.order-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #eee;
+}
+
+.order-actions select {
+    flex: 1;
+    cursor: pointer;
+}
+
