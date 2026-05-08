@@ -601,4 +601,71 @@ button[onclick="logout()"]:hover {
     transform: translateY(-2px);
 }
 
+/* =========================================================
+   👑 GLOW UP PT. 3: BOTÕES ÓRFÃOS E GLASSMORPHISM (LIIA'S BUILD)
+   ========================================================= */
+
+/* 1. Botão de Notificações (Efeito Vidro no Header) */
+#push-admin-btn {
+    background-color: rgba(255, 255, 255, 0.2) !important; /* Fundo semi-transparente */
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 20px !important; /* Formato pílula */
+    padding: 8px 16px !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 0.85em !important;
+    font-weight: 600 !important;
+    backdrop-filter: blur(4px); /* Borrão de vidro estilo iOS */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#push-admin-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    transform: translateY(-2px);
+}
+
+/* 2. Botões de Atualizar (Pedidos, Relatórios e Estoque) */
+.refresh-btn {
+    background-color: #fff !important;
+    color: #ff6b81 !important; /* Letra rosa pra combinar com a loja */
+    border: 1px solid #ffe4e6 !important; /* Borda rosa clarinha */
+    border-radius: 20px !important; /* Formato pílula */
+    padding: 8px 18px !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 0.85em !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(255, 107, 129, 0.05) !important;
+    margin-bottom: 15px !important; /* Espaço para respirar */
+    transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+    background-color: #fff0f2 !important;
+    border-color: #ff6b81 !important;
+}
+
+/* 3. Botão de Sair do Painel (Polimento de Ação Destrutiva) */
+button[onclick="logout()"] {
+    background-color: #fff !important;
+    color: #ef4444 !important; /* Vermelho alerta */
+    border: 1px solid #fecaca !important; /* Borda vermelha clarinha */
+    border-radius: 20px !important; /* Formato pílula */
+    padding: 6px 14px !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 0.85em !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.05) !important;
+    margin-bottom: 0 !important; 
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button[onclick="logout()"]:hover {
+    background-color: #fef2f2 !important;
+    border-color: #ef4444 !important;
+}
 
