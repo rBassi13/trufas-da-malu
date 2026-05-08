@@ -1,7 +1,7 @@
 const API_URL = "https://trufas-da-malu-api.alan-ricardo.workers.dev/api";
 
 let adminToken = localStorage.getItem('malu_admin_token') || null;
-let globalProducts = []; // Array global para o filtro de pesquisa do estoque funcionar sem bater na API
+let globalProducts = []; // Array global para o filtro de pesquisa do estoque
 
 document.addEventListener('DOMContentLoaded', () => {
     if (adminToken) {
@@ -76,38 +76,66 @@ async function loadOrders() {
     }
 }
 
+// 🎨 LIIA'S BUILD: RENDERIZAÇÃO DE PEDIDOS PREMIUM COM BADGES
 function renderOrders(orders) {
     const container = document.getElementById('orders-container');
     container.innerHTML = '';
 
     if (orders.length === 0) {
-        container.innerHTML = '<p>Nenhum pedido encontrado.</p>';
+        container.innerHTML = '<p style="text-align:center; padding: 20px; color: #888;">Nenhum pedido encontrado. 😴</p>';
         return;
     }
 
+    // Dicionários para traduzir o status do banco para a Badge visual
+    const statusMap = {
+        'NEW': 'Novo',
+        'PREPARING': 'Em Preparo',
+        'READY': 'Pronto',
+        'DELIVERED': 'Entregue'
+    };
+    
+    const paymentMap = {
+        'PENDING': 'Pendente',
+        'PAID': 'Pago'
+    };
+
     orders.forEach(o => {
         const div = document.createElement('div');
-        div.className = `order-card status-${o.status}`;
+        div.className = `order-card`;
+
         const date = new Date(o.created_at).toLocaleString('pt-BR');
 
+        // Puxamos a cor da badge dinamicamente
+        const badgeStatusClass = `badge-${o.status.toLowerCase()}`;
+        const badgePaymentClass = `badge-${o.payment_status.toLowerCase()}`;
+
         div.innerHTML = `
-            <h3>Pedido #${o.id}</h3>
-            <p><strong>Cliente:</strong> ${o.customer_name} (${o.customer_phone})</p>
-            <p><strong>Total:</strong> R$ ${o.total_amount.toFixed(2).replace('.',',')}</p>
-            <p><strong>Pagamento:</strong> ${o.payment_method.toUpperCase()} - <strong>${o.payment_status}</strong></p>
-            <p><small>${date}</small></p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                <h3 style="margin: 0; color: #333;">Pedido #${o.id}</h3>
+                <span class="badge ${badgeStatusClass}">${statusMap[o.status] || o.status}</span>
+            </div>
+            
+            <p style="margin: 4px 0;"><strong>Cliente:</strong> ${o.customer_name} (${o.customer_phone})</p>
+            <p style="margin: 4px 0;"><strong>Total:</strong> R$ ${o.total_amount.toFixed(2).replace('.',',')}</p>
+            
+            <div style="margin: 8px 0; display: flex; align-items: center; gap: 8px;">
+                <strong>Pagamento:</strong> ${o.payment_method.toUpperCase()} 
+                <span class="badge ${badgePaymentClass}">${paymentMap[o.payment_status] || o.payment_status}</span>
+            </div>
+            
+            <p style="color: #888; font-size: 0.85em; margin-top: 10px;">📅 ${date}</p>
 
             <div class="order-actions">
                 <select onchange="updateOrderStatus(${o.id}, this.value, 'status')">
-                    <option value="NEW" ${o.status === 'NEW' ? 'selected' : ''}>Novo</option>
-                    <option value="PREPARING" ${o.status === 'PREPARING' ? 'selected' : ''}>Em preparo</option>
-                    <option value="READY" ${o.status === 'READY' ? 'selected' : ''}>Pronto</option>
-                    <option value="DELIVERED" ${o.status === 'DELIVERED' ? 'selected' : ''}>Entregue</option>
+                    <option value="NEW" ${o.status === 'NEW' ? 'selected' : ''}>Status: Novo</option>
+                    <option value="PREPARING" ${o.status === 'PREPARING' ? 'selected' : ''}>Status: Em preparo</option>
+                    <option value="READY" ${o.status === 'READY' ? 'selected' : ''}>Status: Pronto</option>
+                    <option value="DELIVERED" ${o.status === 'DELIVERED' ? 'selected' : ''}>Status: Entregue</option>
                 </select>
 
                 <select onchange="updateOrderStatus(${o.id}, this.value, 'payment_status')">
-                    <option value="PENDING" ${o.payment_status === 'PENDING' ? 'selected' : ''}>Pagamento Pendente</option>
-                    <option value="PAID" ${o.payment_status === 'PAID' ? 'selected' : ''}>Pago</option>
+                    <option value="PENDING" ${o.payment_status === 'PENDING' ? 'selected' : ''}>Pagamento: Pendente</option>
+                    <option value="PAID" ${o.payment_status === 'PAID' ? 'selected' : ''}>Pagamento: Pago</option>
                 </select>
             </div>
         `;
@@ -148,7 +176,6 @@ async function loadInventory() {
         const response = await fetch(`${API_URL}/products`);
         globalProducts = await response.json(); 
         
-        // Garante que o input de busca não fique com texto "fantasma" ao recarregar a tela
         const searchInput = document.getElementById('search-inventory');
         if (searchInput && searchInput.value) {
             filterInventory();
@@ -257,7 +284,6 @@ async function updateProduct(productId) {
         });
         if (response.ok) {
             alert('Produto atualizado!');
-            // Recarrega o estoque pra voltar os cards para modo leitura com os dados novos
             loadInventory(); 
         } else {
             alert('Erro ao atualizar produto!');
@@ -303,7 +329,6 @@ async function addProduct(e) {
         if (response.ok) {
             alert('Trufa cadastrada com sucesso!');
             document.getElementById('add-product-form').reset();
-            // Esconde o formulário depois de cadastrar
             toggleAddForm();
             loadInventory();
         } else {
