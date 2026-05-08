@@ -41,7 +41,32 @@
             </div>
 
             <div id="inventory-tab" class="tab-content hidden">
-                <div class="add-product-section card">
+                <style>
+                    .inventory-input-readonly {
+                        border: none !important;
+                        background: transparent !important;
+                        padding: 0 !important;
+                        color: #333 !important;
+                        font-family: inherit;
+                        font-size: 1em;
+                        pointer-events: none;
+                        width: 100%;
+                    }
+                    .inventory-input-editing {
+                        border: 1px solid #ccc !important;
+                        background: #fff !important;
+                        padding: 4px 8px !important;
+                        border-radius: 4px;
+                    }
+                </style>
+
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <input type="text" id="search-inventory" placeholder="🔍 Buscar trufa por nome..." oninput="filterInventory()" style="flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+                    <button id="toggle-add-btn" class="secondary-btn" onclick="toggleAddForm()" style="padding: 10px 15px; border-radius: 8px;">➕ Adicionar Nova Trufa</button>
+                    <button onclick="loadInventory()" class="refresh-btn" style="padding: 10px 15px; border-radius: 8px; margin: 0;">🔄 Atualizar</button>
+                </div>
+
+                <div id="add-product-section" class="add-product-section card hidden">
                     <h3>Adicionar Nova Trufa</h3>
                     <form id="add-product-form" onsubmit="addProduct(event)">
                         <input type="text" id="new-name" placeholder="Nome (Ex: Pistache)" required>
@@ -55,7 +80,7 @@
                         <button type="submit">Cadastrar Trufa</button>
                     </form>
                 </div>
-                <button onclick="loadInventory()" class="refresh-btn">🔄 Atualizar Estoque</button>
+
                 <div class="inventory-container" id="inventory-container">
                     </div>
             </div>
