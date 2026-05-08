@@ -1,7 +1,7 @@
-// const API_URL = '[https://trufas-da-malu-api.alan-ricardo.workers.dev/api/]';
 const API_URL = "https://trufas-da-malu-api.alan-ricardo.workers.dev/api";
 
 let adminToken = localStorage.getItem('malu_admin_token') || null;
+let globalProducts = []; // Array global para o filtro de pesquisa do estoque funcionar sem bater na API
 
 document.addEventListener('DOMContentLoaded', () => {
     if (adminToken) {
@@ -19,7 +19,7 @@ async function login() {
         });
 
         if (response.ok) {
-            adminToken = pass; // Salvamos a senha como token simples
+            adminToken = pass;
             localStorage.setItem('malu_admin_token', adminToken);
             showDashboard();
         } else {
@@ -30,15 +30,9 @@ async function login() {
     }
 }
 
-// 🚪 Função NOVA: Logout do Painel
 function logout() {
-    // Remove o token do armazenamento do navegador
     localStorage.removeItem('malu_admin_token');
-    
-    // Limpa a variável em memória
     adminToken = null;
-    
-    // Dá um F5 forçado na página pra voltar pra tela de login
     location.reload();
 }
 
@@ -60,6 +54,10 @@ function switchTab(tabId) {
     if (tabId === 'reports-tab') loadReports();
 }
 
+// ==========================================
+// MÓDULO DE PEDIDOS
+// ==========================================
+
 async function loadOrders() {
     try {
         const response = await fetch(`${API_URL}/orders`, {
@@ -67,8 +65,7 @@ async function loadOrders() {
         });
 
         if (response.status === 401) {
-            localStorage.removeItem('malu_admin_token');
-            location.reload();
+            logout();
             return;
         }
 
@@ -91,7 +88,6 @@ function renderOrders(orders) {
     orders.forEach(o => {
         const div = document.createElement('div');
         div.className = `order-card status-${o.status}`;
-
         const date = new Date(o.created_at).toLocaleString('pt-BR');
 
         div.innerHTML = `
@@ -134,7 +130,6 @@ async function updateOrderStatus(orderId, newValue, field) {
         });
 
         if (response.ok) {
-            // Recarregar pra garantir a cor
             loadOrders();
         } else {
             alert('Erro ao atualizar!');
@@ -144,43 +139,102 @@ async function updateOrderStatus(orderId, newValue, field) {
     }
 }
 
+// ==========================================
+// MÓDULO DE ESTOQUE (INVENTORY)
+// ==========================================
+
 async function loadInventory() {
     try {
         const response = await fetch(`${API_URL}/products`);
-        const products = await response.json();
-        renderInventory(products);
+        globalProducts = await response.json(); 
+        
+        // Garante que o input de busca não fique com texto "fantasma" ao recarregar a tela
+        const searchInput = document.getElementById('search-inventory');
+        if (searchInput && searchInput.value) {
+            filterInventory();
+        } else {
+            renderInventory(globalProducts);
+        }
     } catch (e) {
         console.error("Erro ao carregar estoque", e);
     }
+}
+
+function filterInventory() {
+    const termo = document.getElementById('search-inventory').value.toLowerCase();
+    const filtrados = globalProducts.filter(p => p.name.toLowerCase().includes(termo));
+    renderInventory(filtrados);
+}
+
+function toggleAddForm() {
+    const form = document.getElementById('add-product-section');
+    form.classList.toggle('hidden');
 }
 
 function renderInventory(products) {
     const container = document.getElementById('inventory-container');
     container.innerHTML = '';
 
+    if (products.length === 0) {
+        container.innerHTML = '<p style="text-align:center;">Nenhuma trufa encontrada.</p>';
+        return;
+    }
+
     products.forEach(p => {
         const div = document.createElement('div');
         div.className = 'inventory-item card';
+        div.style.display = 'flex';
+        div.style.gap = '15px';
+        div.style.alignItems = 'center';
+
+        const imgSrc = p.image_url || '/assets/icon-192.png';
+
         div.innerHTML = `
-            <h4>${p.name} ${p.is_gourmet ? '🌟' : ''}</h4>
-            <div class="stock-controls" style="display: flex; flex-direction: column; gap: 8px;">
-                <label>
-                    Descrição:
-                    <input type="text" id="desc-${p.id}" value="${p.description}" />
-                </label>
-                <label>
-                    Preço (R$):
-                    <input type="number" step="0.01" id="price-${p.id}" value="${p.price}" />
-                </label>
-                <label>
-                    Estoque:
-                    <input type="number" id="stock-${p.id}" value="${p.stock}" />
-                </label>
-                <button onclick="updateProduct(${p.id})">Salvar Alterações</button>
+            <img src="${imgSrc}" alt="${p.name}" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
+            
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                <h4 style="margin: 0; font-size: 1.2em; color: #333;">${p.name} ${p.is_gourmet ? '🌟' : ''}</h4>
+                
+                <input type="text" id="desc-${p.id}" value="${p.description || ''}" disabled class="inventory-input-readonly" />
+                
+                <div style="display: flex; gap: 15px; align-items: center; margin-top: 4px;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <span style="font-size: 0.9em; font-weight: bold; color: #555;">Preço R$:</span>
+                        <input type="number" step="0.01" id="price-${p.id}" value="${p.price}" disabled class="inventory-input-readonly" style="width: 60px;" />
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <span style="font-size: 0.9em; font-weight: bold; color: #555;">Estoque:</span>
+                        <input type="number" id="stock-${p.id}" value="${p.stock}" disabled class="inventory-input-readonly" style="width: 50px;" />
+                    </div>
+                </div>
+
+                <button id="btn-edit-${p.id}" onclick="toggleEditProduct(${p.id})" style="align-self: flex-start; margin-top: 8px; padding: 6px 16px; font-size: 0.9em; background-color: transparent; color: #333; border: 2px solid #ccc; border-radius: 6px; cursor: pointer; font-weight: bold;">Editar ✏️</button>
             </div>
         `;
         container.appendChild(div);
     });
+}
+
+function toggleEditProduct(id) {
+    const descInput = document.getElementById(`desc-${id}`);
+    const priceInput = document.getElementById(`price-${id}`);
+    const stockInput = document.getElementById(`stock-${id}`);
+    const btn = document.getElementById(`btn-edit-${id}`);
+
+    if (descInput.disabled) {
+        [descInput, priceInput, stockInput].forEach(input => {
+            input.disabled = false;
+            input.classList.remove('inventory-input-readonly');
+            input.classList.add('inventory-input-editing');
+        });
+
+        btn.innerHTML = "Salvar 💾";
+        btn.style.backgroundColor = "#ff4d4d";
+        btn.style.color = "white";
+        btn.style.borderColor = "#ff4d4d";
+    } else {
+        updateProduct(id);
+    }
 }
 
 async function updateProduct(productId) {
@@ -203,7 +257,8 @@ async function updateProduct(productId) {
         });
         if (response.ok) {
             alert('Produto atualizado!');
-            loadInventory();
+            // Recarrega o estoque pra voltar os cards para modo leitura com os dados novos
+            loadInventory(); 
         } else {
             alert('Erro ao atualizar produto!');
         }
@@ -248,6 +303,8 @@ async function addProduct(e) {
         if (response.ok) {
             alert('Trufa cadastrada com sucesso!');
             document.getElementById('add-product-form').reset();
+            // Esconde o formulário depois de cadastrar
+            toggleAddForm();
             loadInventory();
         } else {
             alert('Erro ao cadastrar trufa!');
@@ -257,6 +314,10 @@ async function addProduct(e) {
         alert('Erro ao cadastrar trufa!');
     }
 }
+
+// ==========================================
+// MÓDULO DE RELATÓRIOS E PUSH
+// ==========================================
 
 async function loadReports() {
     try {
@@ -284,7 +345,6 @@ async function loadReports() {
     }
 }
 
-// Push para Admin
 async function subscribeAdminPush() {
     if ('serviceWorker' in navigator) {
         try {
