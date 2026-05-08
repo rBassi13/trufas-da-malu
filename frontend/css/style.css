@@ -524,4 +524,81 @@ header p {
     flex: 1;
     cursor: pointer;
 }
+/* =========================================================
+   👑 GLOW UP PT. 2: NAVEGAÇÃO E BOTÕES (LIIA'S BUILD)
+   ========================================================= */
+
+/* 1. Navegação de Abas (Estilo "Segmented Control" tipo iOS) */
+.admin-tabs {
+    display: flex;
+    justify-content: center;
+    background-color: #f1f5f9; /* Cinza bem clarinho de fundo */
+    padding: 6px;
+    border-radius: 14px;
+    margin-bottom: 25px;
+    gap: 5px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.tab-btn {
+    flex: 1;
+    max-width: 200px;
+    background: transparent;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 0.95em;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* O destaque da aba que está selecionada no momento */
+.tab-btn.active {
+    background-color: #fff;
+    color: #ff6b81; /* Rosa principal da loja */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* 2. Botões de Ação da Barra de Ferramentas (Adicionar, Atualizar) */
+button.secondary-btn, 
+button.refresh-btn {
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Efeito ao passar o mouse */
+button.secondary-btn:hover, 
+button.refresh-btn:hover {
+    border-color: #ff6b81;
+    color: #ff6b81;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 107, 129, 0.15);
+}
+
+/* 3. O botão de Sair com visual moderno de "Ação Destrutiva" */
+button[onclick="logout()"] {
+    background-color: #fef2f2 !important;
+    color: #ef4444 !important;
+    border: 1px solid #fee2e2 !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease;
+}
+
+button[onclick="logout()"]:hover {
+    background-color: #fee2e2 !important;
+    transform: translateY(-2px);
+}
+
 
