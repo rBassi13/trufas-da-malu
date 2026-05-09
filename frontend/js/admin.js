@@ -138,6 +138,20 @@ function renderOrders(orders) {
         const badgeStatusClass = `badge-${o.status.toLowerCase()}`;
         const badgePaymentClass = `badge-${o.payment_status.toLowerCase()}`;
 
+        // 🛠️ NOVO: Montando a listinha de trufas do pedido!
+        let itemsHtml = '';
+        if (o.items && o.items.length > 0) {
+            const lis = o.items.map(item => `<li>🍫 <strong style="color: var(--primary-color);">${item.quantity}x</strong> ${item.name}</li>`).join('');
+            itemsHtml = `
+                <div style="background: #f8fafc; padding: 10px 15px; border-radius: 8px; margin: 12px 0; border: 1px dashed #cbd5e1;">
+                    <strong style="font-size: 0.85em; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Itens do Pedido:</strong>
+                    <ul style="list-style: none; padding: 0; margin: 5px 0 0 0; font-size: 0.95em; color: #333;">
+                        ${lis}
+                    </ul>
+                </div>
+            `;
+        }
+
         div.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                 <h3 style="margin: 0; color: #333; ${o.status === 'CANCELED' ? 'text-decoration: line-through; color: #ef4444;' : ''}">Pedido #${o.id}</h3>
@@ -145,9 +159,9 @@ function renderOrders(orders) {
             </div>
             
             <p style="margin: 4px 0;"><strong>Cliente:</strong> ${o.customer_name} (${o.customer_phone})</p>
-            <p style="margin: 4px 0;"><strong>Total:</strong> R$ ${o.total_amount.toFixed(2).replace('.',',')}</p>
+            <p style="margin: 4px 0;"><strong>Total:</strong> R$ ${parseFloat(o.total_amount).toFixed(2).replace('.',',')}</p>
             
-            <div style="margin: 8px 0; display: flex; align-items: center; gap: 8px;">
+            ${itemsHtml} <div style="margin: 8px 0; display: flex; align-items: center; gap: 8px;">
                 <strong>Pagamento:</strong> ${o.payment_method.toUpperCase()} 
                 <span class="badge ${badgePaymentClass}">${paymentMap[o.payment_status] || o.payment_status}</span>
             </div>
