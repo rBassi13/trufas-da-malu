@@ -35,10 +35,32 @@
             </div>
 
             <div id="orders-tab" class="tab-content active">
-                <button onclick="loadOrders()" class="refresh-btn">🔄 Atualizar Pedidos</button>
-                <div class="orders-container" id="orders-container">
-                    </div>
-            </div>
+                <div class="filters-container card" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary-color);">
+                    <input type="text" id="filter-customer" placeholder="🔍 Buscar Nome ou Fone" oninput="filterOrders()" style="flex: 1; min-width: 150px;">
+                    <select id="filter-status" onchange="filterOrders()" style="flex: 1; min-width: 130px;">
+            <option value="ALL">Status: Todos</option>
+            <option value="NEW" selected>Status: Novo</option>
+            <option value="PREPARING">Status: Em Preparo</option>
+            <option value="READY">Status: Pronto</option>
+            <option value="DELIVERED">Status: Entregue</option>
+            <option value="CANCELED">Status: Cancelado</option>
+        </select>
+
+        <select id="filter-payment" onchange="filterOrders()" style="flex: 1; min-width: 130px;">
+            <option value="ALL" selected>Pagamento: Todos</option>
+            <option value="PENDING">Pagamento: Pendente</option>
+            <option value="PAID">Pagamento: Pago</option>
+        </select>
+
+        <input type="date" id="filter-date" onchange="filterOrders()" style="flex: 1; min-width: 130px;">
+        
+        <button onclick="loadOrders()" class="refresh-btn" style="margin: 0 !important; height: 42px;">🔄 Atualizar</button>
+    </div>
+
+    <div class="orders-container" id="orders-container">
+        </div>
+</div>
+
 
             <div id="inventory-tab" class="tab-content hidden">
                 <style>
