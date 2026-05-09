@@ -131,6 +131,21 @@ export default {
           if (data.status === "READY") {
             ctx.waitUntil(notifyCustomer(orderId, env));
           }
+
+          // 🛠️ LÓGICA INJETADA: Devolver ao estoque se CANCELADO
+          if (data.status === "CANCELED") {
+            // 1. Resgata todos os produtos que estavam nesse pedido
+            const { results: orderItems } = await env.DB.prepare(
+                `SELECT product_id, quantity FROM order_items WHERE order_id = ?`
+            ).bind(orderId).all();
+
+            // 2. Cria um loop e devolve cada quantidade para a prateleira correta
+            for (const item of orderItems) {
+                await env.DB.prepare(
+                    `UPDATE products SET stock = stock + ? WHERE id = ?`
+                ).bind(item.quantity, item.product_id).run();
+            }
+          }
         }
         return new Response(JSON.stringify({ success: true }), { headers });
       }
