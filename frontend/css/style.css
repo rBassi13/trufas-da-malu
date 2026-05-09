@@ -618,30 +618,41 @@ button[onclick="logout()"]:hover {
     border-color: #ef4444 !important;
 }
 
-/* Botão Adicionar Nova Trufa (Pílula Moderna) e Secundários */
-#toggle-add-btn, .secondary-btn {
+/* Unificando os botões da barra de estoque para ficarem idênticos */
+#toggle-add-btn, .refresh-btn {
     background-color: #fff !important;
-    color: #475569 !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 20px !important; /* Formato pílula */
+    color: var(--primary-color) !important;
+    border: 1px solid #ffe4e6 !important;
+    border-radius: 20px !important;
     padding: 8px 16px !important;
     font-family: var(--font-main) !important;
     font-size: 0.85em !important;
     font-weight: 600 !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
-    margin: 0 !important;
+    box-shadow: 0 2px 4px rgba(255, 107, 139, 0.05) !important;
     cursor: pointer;
     transition: all 0.2s ease !important;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    margin: 0 !important;
 }
 
-#toggle-add-btn:hover, .secondary-btn:hover {
-    background-color: #f8fafc !important;
-    border-color: #cbd5e1 !important;
+#toggle-add-btn:hover, .refresh-btn:hover {
+    background-color: #fff0f2 !important;
+    border-color: var(--primary-color) !important;
     transform: translateY(-2px);
 }
+
+/* Regra para o novo textarea invisível funcionar direito */
+textarea.inventory-input-readonly {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    font-family: inherit;
+    pointer-events: none;
+    width: 100%;
+}
+
 
 /* Correções finais de espaço em branco */
 #dashboard-section > div:first-child {
