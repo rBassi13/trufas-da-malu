@@ -215,27 +215,30 @@ function renderInventory(products) {
         div.style.alignItems = 'center';
 
         const imgSrc = p.image_url || '/assets/icon-192.png';
+        
+        // Garante que o número sempre tenha duas casas decimais (ex: 4.00)
+        const formattedPrice = parseFloat(p.price).toFixed(2);
 
         div.innerHTML = `
-            <img src="${imgSrc}" alt="${p.name}" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
+            <img src="${imgSrc}" alt="${p.name}" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 1px solid #eee; flex-shrink: 0;">
             
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                <h4 style="margin: 0; font-size: 1.2em; color: #333;">${p.name} ${p.is_gourmet ? '🌟' : ''}</h4>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+                <h4 style="margin: 0; font-size: 1.2em; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name} ${p.is_gourmet ? '🌟' : ''}</h4>
                 
-                <input type="text" id="desc-${p.id}" value="${p.description || ''}" disabled class="inventory-input-readonly" />
+                <textarea id="desc-${p.id}" disabled class="inventory-input-readonly" style="resize: none; overflow: hidden; height: 42px; font-size: 0.85em; color: #666 !important;">${p.description || ''}</textarea>
                 
                 <div style="display: flex; gap: 15px; align-items: center; margin-top: 4px;">
                     <div style="display: flex; align-items: center; gap: 4px;">
-                        <span style="font-size: 0.9em; font-weight: bold; color: #555;">Preço R$:</span>
-                        <input type="number" step="0.01" id="price-${p.id}" value="${p.price}" disabled class="inventory-input-readonly" style="width: 60px;" />
+                        <span style="font-size: 0.9em; font-weight: bold; color: #555;">R$</span>
+                        <input type="number" step="0.01" id="price-${p.id}" value="${formattedPrice}" disabled class="inventory-input-readonly" style="width: 60px; font-weight: bold;" />
                     </div>
                     <div style="display: flex; align-items: center; gap: 4px;">
                         <span style="font-size: 0.9em; font-weight: bold; color: #555;">Estoque:</span>
-                        <input type="number" id="stock-${p.id}" value="${p.stock}" disabled class="inventory-input-readonly" style="width: 50px;" />
+                        <input type="number" id="stock-${p.id}" value="${p.stock}" disabled class="inventory-input-readonly" style="width: 50px; font-weight: bold;" />
                     </div>
                 </div>
 
-                <button id="btn-edit-${p.id}" onclick="toggleEditProduct(${p.id})" style="align-self: flex-start; margin-top: 8px; padding: 6px 16px; font-size: 0.9em; background-color: transparent; color: #333; border: 2px solid #ccc; border-radius: 6px; cursor: pointer; font-weight: bold;">Editar ✏️</button>
+                <button id="btn-edit-${p.id}" onclick="toggleEditProduct(${p.id})" style="align-self: flex-start; margin-top: 8px; padding: 6px 16px; font-size: 0.9em; background-color: #f8fafc; color: #333; border: 1px solid #e2e8f0; border-radius: 20px; cursor: pointer; font-weight: bold;">Editar ✏️</button>
             </div>
         `;
         container.appendChild(div);
