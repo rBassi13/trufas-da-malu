@@ -91,16 +91,35 @@ export default {
         // Protected route
         if (!checkAuth(request, env))
           return new Response("Unauthorized", { status: 401, headers });
+          
         const { results } = await env.DB.prepare(
           `
-          SELECT o.*, c.name as customer_name, c.phone as customer_phone
+          SELECT 
+            o.*, 
+            c.name as customer_name, 
+            c.phone as customer_phone,
+            (
+              SELECT json_group_array(json_object('name', p.name, 'quantity', oi.quantity))
+              FROM order_items oi
+              JOIN products p ON oi.product_id = p.id
+              WHERE oi.order_id = o.id
+            ) as items_json
           FROM orders o
           JOIN customers c ON o.customer_id = c.id
           ORDER BY o.created_at DESC
-        `,
+        `
         ).all();
-        return new Response(JSON.stringify(results), { headers });
+
+        // O banco de dados devolve o array de itens como uma string (texto).
+        // Vamos converter (parse) de volta para um array de verdade para o Front-end ler fácil!
+        const ordersWithItems = results.map(o => ({
+            ...o,
+            items: JSON.parse(o.items_json || '[]')
+        }));
+
+        return new Response(JSON.stringify(ordersWithItems), { headers });
       }
+
 
       if (cleanPath.startsWith("/api/orders/") && method === "PATCH") {
         if (!checkAuth(request, env))
