@@ -662,3 +662,7 @@ textarea.inventory-input-readonly {
     margin-bottom: 12px !important;
     gap: 8px !important;
 }
+
+/* Badge de Cancelado com opacidade no Card inteiro */
+.badge-canceled { background-color: #fee2e2; color: #b91c1c; }
+.order-card.canceled-card { opacity: 0.6; border-left-color: #ef4444; }
