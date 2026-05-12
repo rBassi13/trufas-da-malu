@@ -1,7 +1,7 @@
 {
   "name": "Trufas da Malu",
   "short_name": "Trufas",
-  "start_url": "/",
+  "start_url": "/admin",
   "display": "standalone",
   "background_color": "#ffe5ec",
   "theme_color": "#ffb6c1",
