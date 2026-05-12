@@ -1,14 +1,18 @@
 const API_URL = "https://trufas-da-malu-api.alan-ricardo.workers.dev/api";
 
 let adminToken = localStorage.getItem('malu_admin_token') || null;
-let globalProducts = []; // Array global para o filtro de pesquisa do estoque
-let globalOrders = []; // Array que vai guardar os pedidos na memória
+let globalProducts = []; 
+let globalOrders = []; 
 
 document.addEventListener('DOMContentLoaded', () => {
     if (adminToken) {
         showDashboard();
     }
 });
+
+// ==========================================
+// AUTENTICAÇÃO E NAVEGAÇÃO
+// ==========================================
 
 async function login() {
     const pass = document.getElementById('admin-pass').value;
@@ -71,9 +75,9 @@ async function loadOrders() {
         }
 
         globalOrders = await response.json();
-        filterOrders(); // Aplica os filtros na mesma hora que carregar
+        filterOrders(); 
     } catch (error) {
-        console.error("Erro", error);
+        console.error("Erro ao carregar pedidos", error);
     }
 }
 
@@ -84,16 +88,10 @@ function filterOrders() {
     const dateFilter = document.getElementById('filter-date').value;
 
     const filtrados = globalOrders.filter(o => {
-        // Filtro 1: Cliente ou Telefone
         const matchCustomer = o.customer_name.toLowerCase().includes(customerFilter) || o.customer_phone.includes(customerFilter);
-        
-        // Filtro 2: Status do Pedido
         const matchStatus = statusFilter === 'ALL' || o.status === statusFilter;
-        
-        // Filtro 3: Status do Pagamento
         const matchPayment = paymentFilter === 'ALL' || o.payment_status === paymentFilter;
         
-        // Filtro 4: Data Exata
         let matchDate = true;
         if (dateFilter) {
             const orderDate = new Date(o.created_at).toLocaleDateString('en-CA'); 
@@ -136,7 +134,7 @@ function renderOrders(orders) {
         const badgeStatusClass = `badge-${o.status.toLowerCase()}`;
         const badgePaymentClass = `badge-${o.payment_status.toLowerCase()}`;
 
-        // Montando a listinha de trufas do pedido!
+        // Renderização dos Itens do Pedido
         let itemsHtml = '';
         if (o.items && o.items.length > 0) {
             const lis = o.items.map(item => `<li>🍫 <strong style="color: var(--primary-color);">${item.quantity}x</strong> ${item.name}</li>`).join('');
@@ -188,7 +186,6 @@ function renderOrders(orders) {
 }
 
 async function updateOrderStatus(orderId, newValue, field) {
-    // Alerta de Segurança Anti-Dedo Gordo do Cancelamento
     if (field === 'status' && newValue === 'CANCELED') {
         const confirmar = confirm("🚨 Tem certeza que deseja CANCELAR este pedido? As trufas serão devolvidas para o estoque!");
         if (!confirmar) {
@@ -211,10 +208,9 @@ async function updateOrderStatus(orderId, newValue, field) {
         });
 
         if (response.ok) {
-            // Se cancelou, atualiza o estoque silenciosamente
             if (newValue === 'CANCELED') loadInventory();
             
-            // Integração WhatsApp
+            // Integração WhatsApp com Itens
             if (field === 'status') {
                 const order = globalOrders.find(o => o.id === orderId);
                 
@@ -236,13 +232,17 @@ async function updateOrderStatus(orderId, newValue, field) {
                             phone = '55' + phone;
                         }
                         
-                        const msg = `Oie, ${order.customer_name}! 🍫\nAqui é das *Trufas da Malu*.\n\nSeu pedido #${order.id} acabou de ser atualizado para: *${statusName}*!\n\nQualquer dúvida é só nos chamar aqui. 💖`;
+                        let textItens = '';
+                        if (order.items && order.items.length > 0) {
+                            textItens = '\n\n*Resumo do Pedido:*\n' + order.items.map(item => `▫️ ${item.quantity}x ${item.name}`).join('\n');
+                        }
+                        
+                        const msg = `Oie, ${order.customer_name}! 🍫\nAqui é das *Trufas da Malu*.\n\nSeu pedido #${order.id} acabou de ser atualizado para: *${statusName}*!${textItens}\n\nQualquer dúvida é só nos chamar aqui. 💖`;
                         const zapUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
                         window.open(zapUrl, '_blank');
                     }
                 }
             }
-
             loadOrders(); 
         } else {
             alert('Erro ao atualizar!');
@@ -496,6 +496,7 @@ function urlBase64ToUint8Array(base64String) {
     for (let i = 0; i < rawData.length; ++i) { outputArray[i] = rawData.charCodeAt(i); }
     return outputArray;
 }
+
 function arrayBufferToBase64(buffer) {
     let binary = '';
     const bytes = new Uint8Array(buffer);
