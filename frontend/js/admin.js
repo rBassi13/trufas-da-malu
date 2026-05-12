@@ -1,8 +1,8 @@
-/* FORCE */
 const API_URL = "https://trufas-da-malu-api.alan-ricardo.workers.dev/api";
 
 let adminToken = localStorage.getItem('malu_admin_token') || null;
-let globalProducts = []; // Array global para o filtro de pesquisa do estoque
+let globalProducts = [];
+let globalOrders = []; 
 
 document.addEventListener('DOMContentLoaded', () => {
     if (adminToken) {
@@ -59,8 +59,6 @@ function switchTab(tabId) {
 // MÓDULO DE PEDIDOS
 // ==========================================
 
-let globalOrders = []; // Array que vai guardar os pedidos na memória
-
 async function loadOrders() {
     try {
         const response = await fetch(`${API_URL}/orders`, {
@@ -73,7 +71,7 @@ async function loadOrders() {
         }
 
         globalOrders = await response.json();
-        filterOrders(); // Aplica os filtros na mesma hora que carregar
+        filterOrders();
     } catch (error) {
         console.error("Erro", error);
     }
@@ -86,19 +84,12 @@ function filterOrders() {
     const dateFilter = document.getElementById('filter-date').value;
 
     const filtrados = globalOrders.filter(o => {
-        // Filtro 1: Cliente ou Telefone
         const matchCustomer = o.customer_name.toLowerCase().includes(customerFilter) || o.customer_phone.includes(customerFilter);
-        
-        // Filtro 2: Status do Pedido
         const matchStatus = statusFilter === 'ALL' || o.status === statusFilter;
-        
-        // Filtro 3: Status do Pagamento
         const matchPayment = paymentFilter === 'ALL' || o.payment_status === paymentFilter;
         
-        // Filtro 4: Data Exata
         let matchDate = true;
         if (dateFilter) {
-            // Converte a data do banco para YYYY-MM-DD local
             const orderDate = new Date(o.created_at).toLocaleDateString('en-CA'); 
             matchDate = orderDate === dateFilter;
         }
@@ -139,7 +130,6 @@ function renderOrders(orders) {
         const badgeStatusClass = `badge-${o.status.toLowerCase()}`;
         const badgePaymentClass = `badge-${o.payment_status.toLowerCase()}`;
 
-        // 🛠️ NOVO: Montando a listinha de trufas do pedido!
         let itemsHtml = '';
         if (o.items && o.items.length > 0) {
             const lis = o.items.map(item => `<li>🍫 <strong style="color: var(--primary-color);">${item.quantity}x</strong> ${item.name}</li>`).join('');
@@ -162,7 +152,9 @@ function renderOrders(orders) {
             <p style="margin: 4px 0;"><strong>Cliente:</strong> ${o.customer_name} (${o.customer_phone})</p>
             <p style="margin: 4px 0;"><strong>Total:</strong> R$ ${parseFloat(o.total_amount).toFixed(2).replace('.',',')}</p>
             
-            ${itemsHtml} <div style="margin: 8px 0; display: flex; align-items: center; gap: 8px;">
+            ${itemsHtml} 
+            
+            <div style="margin: 8px 0; display: flex; align-items: center; gap: 8px;">
                 <strong>Pagamento:</strong> ${o.payment_method.toUpperCase()} 
                 <span class="badge ${badgePaymentClass}">${paymentMap[o.payment_status] || o.payment_status}</span>
             </div>
@@ -189,11 +181,10 @@ function renderOrders(orders) {
 }
 
 async function updateOrderStatus(orderId, newValue, field) {
-    // Alerta de Segurança Anti-Dedo Gordo
     if (field === 'status' && newValue === 'CANCELED') {
         const confirmar = confirm("🚨 Tem certeza que deseja CANCELAR este pedido? As trufas serão devolvidas para o estoque!");
         if (!confirmar) {
-            filterOrders(); // Recarrega a tela para voltar o select pro que estava antes
+            filterOrders(); 
             return;
         }
     }
@@ -212,101 +203,8 @@ async function updateOrderStatus(orderId, newValue, field) {
         });
 
         if (response.ok) {
-            // Se cancelou com sucesso, recarrega também o estoque para atualizar a UI lá atrás
             if (newValue === 'CANCELED') loadInventory();
-            loadOrders(); // Atualiza a lista e filtra de novo
-        } else {
-            alert('Erro ao atualizar!');
-        }
-    } catch(e) {
-        alert('Erro ao atualizar pedido');
-    }
-}
-
-
-// 🎨 LIIA'S BUILD: RENDERIZAÇÃO DE PEDIDOS PREMIUM COM BADGES
-function renderOrders(orders) {
-    const container = document.getElementById('orders-container');
-    container.innerHTML = '';
-
-    if (orders.length === 0) {
-        container.innerHTML = '<p style="text-align:center; padding: 20px; color: #888;">Nenhum pedido encontrado. 😴</p>';
-        return;
-    }
-
-    // Dicionários para traduzir o status do banco para a Badge visual
-    const statusMap = {
-        'NEW': 'Novo',
-        'PREPARING': 'Em Preparo',
-        'READY': 'Pronto',
-        'DELIVERED': 'Entregue'
-    };
-    
-    const paymentMap = {
-        'PENDING': 'Pendente',
-        'PAID': 'Pago'
-    };
-
-    orders.forEach(o => {
-        const div = document.createElement('div');
-        div.className = `order-card`;
-
-        const date = new Date(o.created_at).toLocaleString('pt-BR');
-
-        // Puxamos a cor da badge dinamicamente
-        const badgeStatusClass = `badge-${o.status.toLowerCase()}`;
-        const badgePaymentClass = `badge-${o.payment_status.toLowerCase()}`;
-
-        div.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                <h3 style="margin: 0; color: #333;">Pedido #${o.id}</h3>
-                <span class="badge ${badgeStatusClass}">${statusMap[o.status] || o.status}</span>
-            </div>
-            
-            <p style="margin: 4px 0;"><strong>Cliente:</strong> ${o.customer_name} (${o.customer_phone})</p>
-            <p style="margin: 4px 0;"><strong>Total:</strong> R$ ${o.total_amount.toFixed(2).replace('.',',')}</p>
-            
-            <div style="margin: 8px 0; display: flex; align-items: center; gap: 8px;">
-                <strong>Pagamento:</strong> ${o.payment_method.toUpperCase()} 
-                <span class="badge ${badgePaymentClass}">${paymentMap[o.payment_status] || o.payment_status}</span>
-            </div>
-            
-            <p style="color: #888; font-size: 0.85em; margin-top: 10px;">📅 ${date}</p>
-
-            <div class="order-actions">
-                <select onchange="updateOrderStatus(${o.id}, this.value, 'status')">
-                    <option value="NEW" ${o.status === 'NEW' ? 'selected' : ''}>Status: Novo</option>
-                    <option value="PREPARING" ${o.status === 'PREPARING' ? 'selected' : ''}>Status: Em preparo</option>
-                    <option value="READY" ${o.status === 'READY' ? 'selected' : ''}>Status: Pronto</option>
-                    <option value="DELIVERED" ${o.status === 'DELIVERED' ? 'selected' : ''}>Status: Entregue</option>
-                </select>
-
-                <select onchange="updateOrderStatus(${o.id}, this.value, 'payment_status')">
-                    <option value="PENDING" ${o.payment_status === 'PENDING' ? 'selected' : ''}>Pagamento: Pendente</option>
-                    <option value="PAID" ${o.payment_status === 'PAID' ? 'selected' : ''}>Pagamento: Pago</option>
-                </select>
-            </div>
-        `;
-        container.appendChild(div);
-    });
-}
-
-async function updateOrderStatus(orderId, newValue, field) {
-    const payload = {};
-    payload[field] = newValue;
-
-    try {
-        const response = await fetch(`${API_URL}/orders/${orderId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${adminToken}`
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-            loadOrders();
+            loadOrders(); 
         } else {
             alert('Erro ao atualizar!');
         }
@@ -363,8 +261,6 @@ function renderInventory(products) {
         div.style.alignItems = 'center';
 
         const imgSrc = p.image_url || '/assets/icon-192.png';
-        
-        // Garante que o número sempre tenha duas casas decimais (ex: 4.00)
         const formattedPrice = parseFloat(p.price).toFixed(2);
 
         div.innerHTML = `
