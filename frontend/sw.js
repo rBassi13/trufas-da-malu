@@ -68,3 +68,18 @@ self.addEventListener('notificationclick', event => {
     );
   }
 });
+// O Chrome EXIGE esse evento 'fetch' para liberar o botão de Instalar Aplicativo!
+const CACHE_NAME = 'trufas-malu-v1';
+
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+});
+
+self.addEventListener('fetch', (event) => {
+  // Uma estratégia simples: tenta ir na rede, se falhar (sem internet), procura no cache
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
+    })
+  );
+});
