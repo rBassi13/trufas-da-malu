@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trufas-da-malu-v1';
+const CACHE_NAME = 'trufas-da-malu-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -9,7 +9,9 @@ const urlsToCache = [
   '/manifest.json'
 ];
 
+// Instala o Service Worker e salva os arquivos no cache
 self.addEventListener('install', event => {
+  self.skipWaiting(); // Força a ativação imediata
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -18,65 +20,28 @@ self.addEventListener('install', event => {
   );
 });
 
+// Limpa caches antigos quando uma nova versão sobe (Evita arquivos zumbis)
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+
+// Estratégia de Fetch: Tenta a Rede (Network). Se falhar (Offline), puxa do Cache.
 self.addEventListener('fetch', event => {
-  // Ignorar chamadas da API no cache
+  // Ignorar chamadas da API no cache (sempre queremos os pedidos em tempo real)
   if (event.request.url.includes('/api/')) {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
-  );
-});
-
-self.addEventListener('push', event => {
-  let data = { title: 'Nova Notificação', body: 'Você tem uma atualização!', url: '/' };
-
-  if (event.data) {
-    try {
-      data = event.data.json();
-    } catch(e) {
-      data.body = event.data.text();
-    }
-  }
-
-  const options = {
-    body: data.body,
-    icon: '/assets/icon-192.png',
-    badge: '/assets/icon-192.png',
-    data: {
-      url: data.url
-    }
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(data.title, options)
-  );
-});
-
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  if (event.notification.data && event.notification.data.url) {
-    event.waitUntil(
-      clients.openWindow(event.notification.data.url)
-    );
-  }
-});
-// O Chrome EXIGE esse evento 'fetch' para liberar o botão de Instalar Aplicativo!
-const CACHE_NAME = 'trufas-malu-v1';
-
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
-});
-
-self.addEventListener('fetch', (event) => {
-  // Uma estratégia simples: tenta ir na rede, se falhar (sem internet), procura no cache
   event.respondWith(
     fetch(event.request).catch(() => {
       return caches.match(event.request);
