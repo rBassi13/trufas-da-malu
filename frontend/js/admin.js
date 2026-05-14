@@ -427,7 +427,7 @@ async function addProduct(e) {
 }
 
 // ==========================================
-// MÓDULO DE RELATÓRIOS E PUSH
+// MÓDULO DE RELATÓRIOS
 // ==========================================
 
 async function loadReports() {
@@ -454,52 +454,4 @@ async function loadReports() {
     } catch (error) {
         console.error("Erro ao carregar relatórios", error);
     }
-}
-
-async function subscribeAdminPush() {
-    if ('serviceWorker' in navigator) {
-        try {
-            const registration = await navigator.serviceWorker.register('/sw.js');
-            const VAPID_PUBLIC_KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuB23zS2e5TdbR9U8y_A4lB780';
-            const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: convertedVapidKey
-            });
-
-            await fetch(`${API_URL}/push/subscribe`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    endpoint: subscription.endpoint,
-                    keys: {
-                        p256dh: arrayBufferToBase64(subscription.getKey('p256dh')),
-                        auth: arrayBufferToBase64(subscription.getKey('auth'))
-                    },
-                    userType: 'admin'
-                })
-            });
-
-            alert("Notificações de admin ativadas! 🔔");
-        } catch (error) {
-            console.error("Erro admin push", error);
-        }
-    }
-}
-
-function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) { outputArray[i] = rawData.charCodeAt(i); }
-    return outputArray;
-}
-
-function arrayBufferToBase64(buffer) {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    for (let i = 0; i < bytes.byteLength; i++) { binary += String.fromCharCode(bytes[i]); }
-    return window.btoa(binary);
 }
